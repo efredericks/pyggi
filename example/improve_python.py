@@ -14,17 +14,49 @@ from pyggi.algorithms import LocalSearch
 class MyProgram(AbstractProgram):
     def compute_fitness(self, result, return_code, stdout, stderr, elapsed_time):
         import re
-        m = re.findall("runtime: ([0-9.]+)", stdout)
+        m = re.findall("difference: ([0-9.]+)", stdout)
+        # with open("./output", "a") as f:
+        #     f.write(stdout)
         if len(m) > 0:
             runtime = m[0]
             failed = re.findall("([0-9]+) failed", stdout)
             pass_all = len(failed) == 0
             if pass_all:
                 result.fitness = round(float(runtime), 3)
+                with open("./parse-success", "a") as f:
+                    f.write(stdout)
             else:
                 result.status = 'PARSE_ERROR'
+                with open("./parse-error-output-1", "a") as f:
+                    f.write(stdout)
         else:
             result.status = 'PARSE_ERROR'
+            with open("./parse-error-output-2", "a") as f:
+                f.write(stdout)
+
+        # m = re.findall("runtime: ([0-9.]+)", stdout)
+        # if len(m) > 0:
+        #     runtime = m[0]
+        #     failed = re.findall("([0-9]+) failed", stdout)
+        #     pass_all = len(failed) == 0
+        #     if pass_all:
+        #         result.fitness = round(float(runtime), 3)
+        #     else:
+        #         result.status = 'PARSE_ERROR'
+        # else:
+        #     result.status = 'PARSE_ERROR'
+
+        # m = re.findall("valid: ([0-9.]+)", stdout)
+        # if len(m) > 0:
+        #     runtime = m[0]
+        #     failed = re.findall("([0-9]+) failed", stdout)
+        #     pass_all = len(failed) == 0
+        #     if pass_all:
+        #         result.fitness = round(float(runtime), 3)
+        #     else:
+        #         result.status = 'PARSE_ERROR'
+        # else:
+        #     result.status = 'PARSE_ERROR'
 
 class MyLineProgram(LineProgram, MyProgram):
     pass
@@ -42,7 +74,7 @@ class MyLocalSearch(LocalSearch):
         return patch
 
     def stopping_criterion(self, iter, fitness):
-        return fitness < 0.05
+        return fitness > 50#< 0.05
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Improvement Example')
@@ -64,7 +96,7 @@ if __name__ == "__main__":
         local_search = MyLocalSearch(program)
         local_search.operators = [StmtReplacement, StmtInsertion, StmtDeletion]
 
-    result = local_search.run(warmup_reps=5, epoch=args.epoch, max_iter=args.iter, timeout=15)
+    result = local_search.run(warmup_reps=5, epoch=args.epoch, max_iter=args.iter, timeout=50)#15)
     print("======================RESULT======================")
     for epoch in range(len(result)):
         print("Epoch {}".format(epoch))
