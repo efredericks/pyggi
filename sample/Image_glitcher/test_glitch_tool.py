@@ -121,10 +121,11 @@ def test_modes(starter):#shared_uuid):
         "--bytes", str(random.randint(0,100)),#str(10),
         "--repeat-width", str(random.randint(0,100)),
     ])
-    glitch_tool = GlitchTool(args, _uuid, out)
-    glitch_tool.main()
-
-    check_validity(glitch_tool.outPath)
+    #glitch_tool = GlitchTool(args, _uuid, out)
+    #glitch_tool.main()
+    #check_validity(glitch_tool.outPath)
+    outPath = glitch_main(args, _uuid, out)
+    check_validity(outPath)
 
 @pytest.fixture(scope="session", autouse=True)
 def starter(request):
