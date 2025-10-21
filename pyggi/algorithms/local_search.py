@@ -118,6 +118,7 @@ class LocalSearch(Algorithm):
             cur_result['Success'] = False
             cur_result['FitnessEval'] = 0
             cur_result['InvalidPatch'] = 0
+            cur_result['ValidPatch'] = 0
             cur_result['diff'] = None
 
             start = time.time()
@@ -130,6 +131,7 @@ class LocalSearch(Algorithm):
                     cur_result['InvalidPatch'] += 1
                     update_best = False
                 else:
+                    cur_result['ValidPatch'] += 1
                     update_best = self.is_better_than_the_best(run.fitness, best_fitness)
 
                 if update_best:

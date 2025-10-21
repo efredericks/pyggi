@@ -11,6 +11,9 @@ from pyggi.tree import TreeProgram
 from pyggi.tree import StmtReplacement, StmtInsertion, StmtDeletion
 from pyggi.algorithms import LocalSearch
 
+import subprocess, os
+import ast
+
 class MyProgram(AbstractProgram):
     def compute_fitness(self, result, return_code, stdout, stderr, elapsed_time):
         import re
@@ -22,9 +25,51 @@ class MyProgram(AbstractProgram):
             failed = re.findall("([0-9]+) failed", stdout)
             pass_all = len(failed) == 0
             if pass_all:
-                result.fitness = round(float(runtime), 3)
+                #with open("./parse-succes-mod-length", "a") as f:
+                    # f.write(str(self.modification_points['glitch_tool.py']))
+                #    f.write(stdout, " ", str(len(self.modification_points['glitch_tool.py'])) + '\n')
+
+                cmd = f"diff -U 0 /home/erik/research-git/pyggi/sample/Image_glitcher/glitch_tool.py {self.tmp_path}/glitch_tool.py | grep ^@ | wc -l"
+                ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+                output = int(ps.communicate()[0])
+                with open('test-contents', 'a') as f:
+                    f.write(str(self.tmp_path)+'\n')
+
+                    # try:
+                    # cmd = "ps -A|grep 'process_name'"
+                    f.write(f"diffs: {str(int(output))}\n")
+                    # print(output)
+
+                    #     result = subprocess.run(["diff", "-U", "0", os.path.join(self.tmp_path,'glitch_tool.py'), "/home/erik/research-git/pyggi/sample/Image_glitcher/glitch_tool.py", "|", "grep", "^@", "|", "wc", "-l"],
+                    #         # ["ls", "-l"],  
+                    #         capture_output=True,
+                    #         text=True,  
+                    #         check=True)
+                    #     num_diffs = int(result.stdout)
+                    #     f.write(str(num_diffs)+'\n')
+                    #     if result.stderr:
+                    #         f.write("Command errors:")
+                    #         f.write(result.stderr + '\n')
+                    # except subprocess.CalledProcessError as e:
+                    #     print(f"Stderr: {e}, {e.stderr}\n")
+                    #   f.write('Error\n')
+
+
+
+                #     self.load_contents()
+                #     lines = ast.unparse(self.contents['glitch_tool.py'])
+                #     f.write(str(self.contents['glitch_tool.py']) + '\n')
+                #     f.write(str(len(str(self.contents['glitch_tool.py']))) + '\n')
+                #     f.write(str(len(lines)))
+                    # f.write(str(self.contents.keys())+'\n')
+                    # f.write(str(ast.unparse(self.contents['glitch_tool.py']))+ '\n')
+                    # f.write(str(self.contents['glitch_tool.py'].end_lineno) + '\n')
+
+                rt = round(float(runtime), 3)
+                # mp = len(self.modification_points['glitch_tool.py'])
+                result.fitness = rt +output#+ mp #round(float(runtime), 3) + len(self.modification_points['glitch_tool.py'])
                 with open("./parse-success", "a") as f:
-                    f.write(stdout)
+                    f.write(f"{result.fitness} {output} {rt} {stdout}")
             else:
                 result.status = 'PARSE_ERROR'
                 with open("./parse-error-output-1", "a") as f:
@@ -64,6 +109,29 @@ class MyLineProgram(LineProgram, MyProgram):
 class MyTreeProgram(TreeProgram, MyProgram):
     pass
 
+class MyTabuSearch(LocalSearch):
+    def setup(self):
+        self.tabu = []
+
+    def get_neighbour(self, patch):
+        while True:
+            temp_patch = patch.clone()
+            if len(temp_patch) > 0 and random.random() < 0.5:
+                temp_patch.remove(random.randrange(0, len(temp_patch)))
+            else:
+                edit_operator = random.choice(self.operators)
+                temp_patch.add(edit_operator.create(self.program, method="weighted"))
+            if not any(item == temp_patch for item in self.tabu):
+                self.tabu.append(temp_patch)
+                break
+        return temp_patch
+
+    def is_better_than_the_best(self, fitness, best_fitness):
+        return fitness > best_fitness
+
+    def stopping_criterion(self, iter, fitness):
+        return fitness > 100000
+
 class MyLocalSearch(LocalSearch):
     def get_neighbour(self, patch):
         if len(patch) > 0 and random.random() < 0.5:
@@ -89,11 +157,11 @@ if __name__ == "__main__":
 
     if args.mode == 'line':
         program = MyLineProgram(args.project_path)
-        local_search = MyLocalSearch(program)
+        local_search = MyTabuSearch(program)#MyLocalSearch(program)
         local_search.operators = [LineReplacement, LineInsertion, LineDeletion]
     elif args.mode == 'tree':
         program = MyTreeProgram(args.project_path)
-        local_search = MyLocalSearch(program)
+        local_search = MyTabuSearch(program)#MyLocalSearch(program)
         local_search.operators = [StmtReplacement, StmtInsertion, StmtDeletion]
 
     result = local_search.run(warmup_reps=5, epoch=args.epoch, max_iter=args.iter, timeout=50)#15)
