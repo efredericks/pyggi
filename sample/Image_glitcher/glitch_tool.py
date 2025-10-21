@@ -9,8 +9,8 @@ import sys
 from PIL import Image
 import imagehash
 
+# Slightly modified version of glitch-tool: https://github.com/tobloef/glitch-tool
 args = ""
-# class GlitchTool:
 def writeFile(fileByteList, fileNum, iteration, bytesTochange, seed):
     global args
     filename, extension = os.path.splitext(args.infile)
@@ -19,7 +19,6 @@ def writeFile(fileByteList, fileNum, iteration, bytesTochange, seed):
     if (not args.quiet):
         print("Writing file to " + outPath)
     open(outPath, "wb").write(bytes(fileByteList))
-    # return outPath
 
 def messWithFile(originalByteList, iterations, bytesToChange, repeatWidth, fileNum):
     global args
@@ -115,7 +114,6 @@ transforms = {
 def glitch_main(_args, _uuid, out):
     global args
     args = _args
-# def __init__(self, args, _uuid, out):
     uuid = _uuid
     outDir = out
     outPath = ""
@@ -191,6 +189,9 @@ parser.add_argument("--generate_test_set", action="store_true", help="Generate r
 if __name__ == "__main__":
     args = parser.parse_args()
 
+    # Commented out with the concern that PYGGI might try to modify this as part of its efforts
+    # Uncomment to allow the test set to be generated
+
     # if args.generate_test_set:
     #     out = "/home/erik/research-git/pyggi/sample/Image_glitcher/test-set/"
     #     modes = ["change", "reverse", "repeat", "remove", "zero", "insert", "replace", "move"]
@@ -236,6 +237,6 @@ if __name__ == "__main__":
 
 
     # else:
+        # glitch_main(args, "manual", args.outdir)
+
     glitch_main(args, "manual", args.outdir)
-        # glitch_tool = GlitchTool(args, "manual", ".")
-        # glitch_tool.main()

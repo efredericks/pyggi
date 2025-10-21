@@ -25,9 +25,6 @@ class MyProgram(AbstractProgram):
             failed = re.findall("([0-9]+) failed", stdout)
             pass_all = len(failed) == 0
             if pass_all:
-                #with open("./parse-succes-mod-length", "a") as f:
-                    # f.write(str(self.modification_points['glitch_tool.py']))
-                #    f.write(stdout, " ", str(len(self.modification_points['glitch_tool.py'])) + '\n')
 
                 cmd = f"diff -U 0 /home/erik/research-git/pyggi/sample/Image_glitcher/glitch_tool.py {self.tmp_path}/glitch_tool.py | grep ^@ | wc -l"
                 ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
@@ -35,39 +32,10 @@ class MyProgram(AbstractProgram):
                 with open('test-contents', 'a') as f:
                     f.write(str(self.tmp_path)+'\n')
 
-                    # try:
-                    # cmd = "ps -A|grep 'process_name'"
                     f.write(f"diffs: {str(int(output))}\n")
-                    # print(output)
-
-                    #     result = subprocess.run(["diff", "-U", "0", os.path.join(self.tmp_path,'glitch_tool.py'), "/home/erik/research-git/pyggi/sample/Image_glitcher/glitch_tool.py", "|", "grep", "^@", "|", "wc", "-l"],
-                    #         # ["ls", "-l"],  
-                    #         capture_output=True,
-                    #         text=True,  
-                    #         check=True)
-                    #     num_diffs = int(result.stdout)
-                    #     f.write(str(num_diffs)+'\n')
-                    #     if result.stderr:
-                    #         f.write("Command errors:")
-                    #         f.write(result.stderr + '\n')
-                    # except subprocess.CalledProcessError as e:
-                    #     print(f"Stderr: {e}, {e.stderr}\n")
-                    #   f.write('Error\n')
-
-
-
-                #     self.load_contents()
-                #     lines = ast.unparse(self.contents['glitch_tool.py'])
-                #     f.write(str(self.contents['glitch_tool.py']) + '\n')
-                #     f.write(str(len(str(self.contents['glitch_tool.py']))) + '\n')
-                #     f.write(str(len(lines)))
-                    # f.write(str(self.contents.keys())+'\n')
-                    # f.write(str(ast.unparse(self.contents['glitch_tool.py']))+ '\n')
-                    # f.write(str(self.contents['glitch_tool.py'].end_lineno) + '\n')
 
                 rt = round(float(runtime), 3)
-                # mp = len(self.modification_points['glitch_tool.py'])
-                result.fitness = rt +output#+ mp #round(float(runtime), 3) + len(self.modification_points['glitch_tool.py'])
+                result.fitness = rt +output
                 with open("./parse-success", "a") as f:
                     f.write(f"{result.fitness} {output} {rt} {stdout}")
             else:
@@ -80,18 +48,6 @@ class MyProgram(AbstractProgram):
                 f.write(stdout)
 
         # m = re.findall("runtime: ([0-9.]+)", stdout)
-        # if len(m) > 0:
-        #     runtime = m[0]
-        #     failed = re.findall("([0-9]+) failed", stdout)
-        #     pass_all = len(failed) == 0
-        #     if pass_all:
-        #         result.fitness = round(float(runtime), 3)
-        #     else:
-        #         result.status = 'PARSE_ERROR'
-        # else:
-        #     result.status = 'PARSE_ERROR'
-
-        # m = re.findall("valid: ([0-9.]+)", stdout)
         # if len(m) > 0:
         #     runtime = m[0]
         #     failed = re.findall("([0-9]+) failed", stdout)
